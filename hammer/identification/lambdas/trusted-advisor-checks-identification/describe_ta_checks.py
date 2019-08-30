@@ -6,10 +6,10 @@ from library.logger import set_logging
 from library.config import Config
 from library.aws.ta import TrustedAdvisorChecker
 from library.aws.utility import Account
-from library.ddb_issues import IssueStatus, TACheckIssue
+from library.ddb_issues import IssueStatus
+from library.ddb_issues import TACheckIssue
 from library.ddb_issues import Operations as IssueOperations
 from library.aws.utility import Sns
-from library.utility import notify_external_systems
 
 def lambda_handler(event, context):
     """ Lambda handler to evaluate trusted advisor checks """
@@ -27,7 +27,7 @@ def lambda_handler(event, context):
     try:
         config = Config()
         main_account = Account(region=config.aws.region)
-        account = Account(id=account_id, role_name=config.aws.role_name_identification)
+        account = Account(id=account_id, role_name=config.aws.role_name_identification, region="us-east-1")
 
         for check in checks:
             check_id = check["id"]

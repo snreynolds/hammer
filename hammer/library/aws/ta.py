@@ -23,6 +23,7 @@ class TrustedAdvisorChecker(object):
         :param checkID: unique check identification used to grab corresponding results.
         """
         self.account = account
+        self.client = account.client("support")
         self.check_id = check_id
 
     def filter(self, filters, name_metadata, result):
@@ -98,7 +99,7 @@ class TrustedAdvisorChecker(object):
         :return: a dictionary containing the Trusted Advisor api response
         """
         try:
-            response = self.account.client("support").describe_trusted_advisor_check_result(checkId=self.check_id, language="en")
+            response = self.client.describe_trusted_advisor_check_result(checkId=self.check_id, language="en")
             return response
         except:
-            logging.exception(f"Failed to call Trusted Advisor initial findings for {self.account}")
+            logging.exception(f"Failed to call Trusted Advisor initial findings.")
