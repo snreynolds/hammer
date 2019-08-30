@@ -166,15 +166,20 @@ $ aws support describe-trusted-advisor-check-result --check-id Qch7DwouX1 --lang
 #How to Configure More Slave Accounts for TA Checks
 In config.json, go to the trsuted_advisor_recommendations section, and add the account ID for each check you want to enable on that account. Make sure that account has all updated permissions needed for Trusted Advisor checks. These permissions were updated in identificaiton-crossaccount-role.json
 
-#To deploy in AWS Environment -- TEST/DEV
+#To deploy in AWS Environment through Cloud Formation Templates
+
 Make any applicable changes using above directions to deployment/configs/config-tadev.json
 
 ```
 $ cd deployment
 $ ./build_packages.sh configs/config.json
-$ aws s3 sync packages/ {s3 bucket}
+$ aws s3 sync packages/ s3://{s3 bucket name}
+
+$ cd cf-templates
+$ aws cloudformation deploy --template-file identification.json --stack-name New-Test-CloudSecurity-Hammer-Identification-Dev-Stack --parameter-overrides IdentificationIAMRole=new-test-cloudsecurity-master-role NestedStackTemplate=https://ta-checks-test.s3-us-west-2.amazonaws.com/cf-templates/identification-nested.json SourceS3Bucket=ta-checks-test  IdentificationCheckRateExpression="16 * * ? *" ResourcesPrefix="dev-hammer-test" --s3-bucket ta-checks-test --s3-prefix cf-templates --region us-west-2
+
 ```
-To update lambda code, do all commands above to sync the s3 bucket and then run:
+To update lambda code, do the first 3 commands above to sync the s3 bucket and then run:
 
 ```
 $ aws lambda update-function-code  --function function-name --s3-bucket {s3 bucket} --s3-key scanzipfile

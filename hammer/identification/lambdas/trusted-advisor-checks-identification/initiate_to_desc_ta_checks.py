@@ -13,7 +13,7 @@ def lambda_handler(event, context):
     logging.debug("Initiating SQS policies checking")
 
     try:
-        sns_arn = os.environ["SNS_TA_ARN"]
+        sns_arn = os.environ["SNS_ARN"]
         config = Config()
 
         if not config.trustedAdvisor.enabled:
@@ -40,11 +40,11 @@ def lambda_handler(event, context):
 
             if (account_and_checks.get(account_id) is None):
 
-                acct_session = Account(id=account_id)
-                account_and_checks.update({account_id: {"account_id" : account_id, "session": acct_session, "checks_info": []}
+                client = Account(id=account_id, region="us-east-1").client("support")
+                account_and_checks.update({account_id: {"account_id" : account_id, "client": client, "checks_info": []}
                 })
 
-            check_response = account_and_checks.get(account_id).get("session").client("support").describe_trusted_advisor_checks(language='en')
+            check_response = account_and_checks.get(account_id).get("client").describe_trusted_advisor_checks(language='en')
 
             for ck in check_response["checks"]:
                 if ck["name"] == checkname:
@@ -58,7 +58,7 @@ def lambda_handler(event, context):
             except:
                 logging.exception("No check to match checkname given")
                 return
-            account_and_checks.get(account_id).get("session").client("support").refresh_trusted_advisor_check(checkId=check_id)
+            account_and_checks.get(account_id).get("client").refresh_trusted_advisor_check(checkId=check_id)
 
     timeout = config.trustedAdvisor.refreshtimeout*60
     start = time.time()
@@ -69,7 +69,7 @@ def lambda_handler(event, context):
             current_account_obj = account_and_checks[acct]
             for chk in current_account_obj["checks_info"]:
                 if chk["refresh_done"] == False:
-                    status = current_account_obj["session"].client("support").describe_trusted_advisor_check_refresh_statuses(checkIds=[chk["id"]])
+                    status = current_account_obj["client"].describe_trusted_advisor_check_refresh_statuses(checkIds=[chk["id"]])
                     if not status["statuses"][0]["status"] == "success":
                         all_refreshes_done = False
                     else:

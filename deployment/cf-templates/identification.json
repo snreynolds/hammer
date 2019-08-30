@@ -251,7 +251,7 @@
         },
         "SourceIdentificationECSExternalImageSource": {
             "Type": "String",
-            "Default": "ecs-image-source-issues-identification.zip"
+            "Default": "ecs-external-image-source-issues-identification.zip"
         },
         "SourceIdentificationElasticSearchLogging": {
             "Type": "String",
